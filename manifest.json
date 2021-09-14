@@ -1,0 +1,26 @@
+{
+  "name": "Clone VRChat Avatar",
+  "version": "1.0.0",
+  "manifest_version": 2,
+  "description": "Clone a VRChat avatar from the VRChat website.",
+  "homepage_url": "https://github.com/imagitama/clone-vrchat-avatar-webextension",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "permissions": [
+    "https://vrchat.com/*",
+    "webNavigation"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://vrchat.com/*"
+      ],
+      "js": [
+        "src/inject.js"
+      ]
+    }
+  ]
+}
