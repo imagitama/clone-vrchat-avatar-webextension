@@ -1,187 +1,194 @@
 const getContainers = () => {
-	const containers = document.querySelectorAll('.search-container');
-	const avatarContainers = [];
+  const containers = document.querySelectorAll(".search-container");
+  const avatarContainers = [];
 
-	for (let i = 0; i < containers.length; i++) {
-		const container = containers[i];
-		const heading = getHeadingInsideContainer(container);
+  for (let i = 0; i < containers.length; i++) {
+    const container = containers[i];
+    const heading = getHeadingInsideContainer(container);
 
-		const anchor = heading.querySelector('a');
+    const anchor = heading.querySelector("a");
 
-		const href = anchor.href;
+    const href = anchor.href;
 
-		if (href.includes('avatar')) {
-			avatarContainers.push(container);
-		}
-	}
+    if (href.includes("avatar")) {
+      avatarContainers.push(container);
+    }
+  }
 
-	return avatarContainers;
-}
+  return avatarContainers;
+};
 
-const getColumnToInsertInto = (container) => container.querySelector('h4').parentElement;
+const getColumnToInsertInto = (container) =>
+  container.querySelector("h4").parentElement;
 
 const cloneAvatarById = async (avatarId) => {
-	console.log(`Cloning avatar ${avatarId}...`);
+  console.log(`Cloning avatar ${avatarId}...`);
 
-	const response = await fetch(`https://vrchat.com/api/1/avatars/${avatarId}/select`, {
-		method: 'PUT'
-	});
+  const response = await fetch(
+    `https://vrchat.com/api/1/avatars/${avatarId}/select`,
+    {
+      method: "PUT",
+    }
+  );
 
-	if (!response.ok) {
-		throw new Error(`Failed to clone avatar ${avatarId}: ${response.status} ${response.statusText}`);
-	}
+  if (!response.ok) {
+    throw new Error(
+      `Failed to clone avatar ${avatarId}: ${response.status} ${response.statusText}`
+    );
+  }
 
-	console.log('Avatar has been cloned successfully');
-}
+  console.log("Avatar has been cloned successfully");
+};
 
 const createButtonForContainer = (container) => {
-	const button = document.createElement('button');
+  const button = document.createElement("button");
 
-	const setStatus = (newText) => {
-		button.innerText = newText
-	}
+  const setStatus = (newText) => {
+    button.innerText = newText;
+  };
 
-	setStatus('Clone');
+  setStatus("Clone");
 
-	button.classList.add('btn');
-	button.classList.add('btn-lg');
-	button.classList.add('clone-btn');
+  button.classList.add("btn");
+  button.classList.add("btn-lg");
+  button.classList.add("clone-btn");
 
-	button.onclick = async () => {
-		try {
-			setStatus('Cloning...');
+  button.onclick = async () => {
+    try {
+      setStatus("Cloning...");
 
-			const avatarId = getAvatarIdInContainer(container);
+      const avatarId = getAvatarIdInContainer(container);
 
-			await cloneAvatarById(avatarId);
+      await cloneAvatarById(avatarId);
 
-			setStatus('Cloned - open VRChat');
-		} catch (err) {
-			console.error(err);
-			setStatus('Failed to clone');
-		}
-	}
+      setStatus("Cloned - restart VRChat");
+    } catch (err) {
+      console.error(err);
+      setStatus("Failed to clone");
+    }
+  };
 
-	return button;
-}
+  return button;
+};
 
 const insertButtonIntoContainer = (container) => {
-	const columnToInsertInto = getColumnToInsertInto(container);
+  const columnToInsertInto = getColumnToInsertInto(container);
 
-	if (columnToInsertInto.querySelector('.clone-btn')) {
-		return
-	}
+  if (columnToInsertInto.querySelector(".clone-btn")) {
+    return;
+  }
 
-	const button = createButtonForContainer(container);
+  const button = createButtonForContainer(container);
 
-	columnToInsertInto.appendChild(button);
-	
-	console.log('Button has been inserted');
-}
+  columnToInsertInto.appendChild(button);
 
-const getHeadingInsideContainer = (container) => container.querySelector('h4')
+  console.log("Button has been inserted");
+};
+
+const getHeadingInsideContainer = (container) => container.querySelector("h4");
 
 const getAvatarIdInContainer = (container) => {
-	const heading = getHeadingInsideContainer(container);
+  const heading = getHeadingInsideContainer(container);
 
-	const anchor = heading.querySelector('a');
+  const anchor = heading.querySelector("a");
 
-	const href = anchor.href;
+  const href = anchor.href;
 
-	const avatarId = href.split('/').pop();
+  const avatarId = href.split("/").pop();
 
-	console.log(`Found avatar ID ${avatarId}`);
-	
-	return avatarId;
-}
+  console.log(`Found avatar ID ${avatarId}`);
 
-let waitForContainerInterval
+  return avatarId;
+};
 
-const waitForContainers = async () => new Promise(resolve => {
-	if (waitForContainerInterval) {
-		clearInterval(waitForContainerInterval);
-	}
+let waitForContainerInterval;
 
-	waitForContainerInterval = setInterval(() => {
-		console.log('Waiting for containers...');
+const waitForContainers = async () =>
+  new Promise((resolve) => {
+    if (waitForContainerInterval) {
+      clearInterval(waitForContainerInterval);
+    }
 
-		const containers = getContainers();
+    waitForContainerInterval = setInterval(() => {
+      console.log("Waiting for containers...");
 
-		if (containers.length > 0) {
-			console.log(`Found ${containers.length} containers`);
+      const containers = getContainers();
 
-			clearInterval(waitForContainerInterval);
-			resolve();
-		}
-	}, 500);
-})
+      if (containers.length > 0) {
+        console.log(`Found ${containers.length} containers`);
+
+        clearInterval(waitForContainerInterval);
+        resolve();
+      }
+    }, 500);
+  });
 
 let knownContainers = [];
 
 const onNewContainersFound = (callback) => {
-	setInterval(() => {
-		const allContainers = getContainers();
-		const newContainers = [];
+  setInterval(() => {
+    const allContainers = getContainers();
+    const newContainers = [];
 
-		for (const container of allContainers) {
-			if (!knownContainers.includes(container)) {
-				newContainers.push(container);
-				knownContainers.push(container);
-			}
-		}
+    for (const container of allContainers) {
+      if (!knownContainers.includes(container)) {
+        newContainers.push(container);
+        knownContainers.push(container);
+      }
+    }
 
-		if (newContainers.length > 0) {
-			callback(newContainers);
-		}
-	}, 500);
-}
+    if (newContainers.length > 0) {
+      callback(newContainers);
+    }
+  }, 500);
+};
 
 const main = async () => {
-	console.log('Starting up...');
+  console.log("Starting up...");
 
-	await waitForContainers();
-	
-	knownContainers = [];
+  await waitForContainers();
 
-	const allContainers = getContainers();
+  knownContainers = [];
 
-	for (const container of allContainers) {
-		insertButtonIntoContainer(container);
-		knownContainers.push(container);
-	}
+  const allContainers = getContainers();
 
-	onNewContainersFound(containers => {
-		for (const container of containers) {
-			insertButtonIntoContainer(container);
-		}
-	});
+  for (const container of allContainers) {
+    insertButtonIntoContainer(container);
+    knownContainers.push(container);
+  }
 
-	console.log('Done!');
-}
+  onNewContainersFound((containers) => {
+    for (const container of containers) {
+      insertButtonIntoContainer(container);
+    }
+  });
+
+  console.log("Done!");
+};
 
 const onNavigation = (callback) => {
-	let previousUrl = location.href;
+  let previousUrl = location.href;
 
-	setInterval(() => {
-		const currentUrl = location.href;
+  setInterval(() => {
+    const currentUrl = location.href;
 
-		if (currentUrl !== previousUrl) {
-			previousUrl = currentUrl;
-			callback();
-		}
-	}, 500);
-}
+    if (currentUrl !== previousUrl) {
+      previousUrl = currentUrl;
+      callback();
+    }
+  }, 500);
+};
 
-chrome.extension.sendMessage({}, function(response) {
-	var readyStateCheckInterval = setInterval(function() {
-	if (document.readyState === "complete") {
-		clearInterval(readyStateCheckInterval);
+chrome.extension.sendMessage({}, function (response) {
+  var readyStateCheckInterval = setInterval(function () {
+    if (document.readyState === "complete") {
+      clearInterval(readyStateCheckInterval);
 
-		main();
+      main();
 
-		onNavigation(() => {
-			main();
-		});
-	}
-	}, 10);
+      onNavigation(() => {
+        main();
+      });
+    }
+  }, 10);
 });

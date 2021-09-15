@@ -4,6 +4,8 @@ A Chrome browser extension that adds a "clone" button to the VRChat website on e
 
 <img src="screenshots/avatars-page.png" height="400" />
 
+Unfortunately due to a limitation in the VRChat API you need to **restart VRChat** to see your newly cloned avatar.
+
 ## Usage
 
 1. Go to Extensions in Chrome
